@@ -38,7 +38,7 @@ services:
 
   bayanat:
     container_name: bayanat
-    image: bayanat
+    image: python:3.10-slim
     build:
       context: .
       dockerfile: ./flask/Dockerfile
@@ -46,6 +46,8 @@ services:
         - ROLE=flask
         - ENV_FILE=${ENV_FILE:-.env}
     volumes:
+      - 'postgres_data:/var/lib/postgresql/data'
+      - 'redis_data:/var/lib/redis/data'
       - '${MEDIA_PATH:-./enferno/media}:/app/enferno/media:rw'
       - './enferno/imports:/app/enferno/imports:rw'
       - './logs:/app/logs:rw'
@@ -64,10 +66,10 @@ services:
 
   celery:
     container_name: celery
-    image: celery
+    image: python:3.10-slim
     build:
       context: .
-      dockerfile: ./flask/Dockerfile
+      dockerfile: ./celery/Dockerfile
       args:
         - ROLE=celery
         - ENV_FILE=${ENV_FILE:-.env}
@@ -105,6 +107,10 @@ services:
       test: [ "CMD", "service", "nginx", "status" ]
       interval: 3s
       retries: 10
+  
+  volumes:
+  redis_data:
+  postgres_data:
 
 volumes:
   redis_data:
