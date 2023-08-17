@@ -28,15 +28,15 @@ class Config(object):
     POSTGRES_USER = os.environ.get('POSTGRES_USER', '')
     POSTGRES_PASSWORD = os.environ.get('POSTGRES_PASSWORD', '')
     POSTGRES_DB = os.environ.get('POSTGRES_DB', 'bayanat')
-    POSTGRES_HOST = os.environ.get('POSTGRES_HOST', 'localhost')
+    POSTGRES_HOST = 'postgres'
 
     if (POSTGRES_USER and POSTGRES_PASSWORD) or POSTGRES_HOST != 'localhost':
         SQLALCHEMY_DATABASE_URI = F'postgresql://{POSTGRES_USER}:{POSTGRES_PASSWORD}@{POSTGRES_HOST}/{POSTGRES_DB}'
     else: 
         SQLALCHEMY_DATABASE_URI = F'postgresql:///{POSTGRES_DB}'
 
-    SQLALCHEMY_TRACK_MODIFICATIONS = False
-
+    # Redis
+    REDIS_HOST = 'redis'
     # Redis
     REDIS_HOST = os.environ.get('REDIS_HOST', 'localhost')
     REDIS_PASSWORD = os.environ.get('REDIS_PASSWORD', '')
