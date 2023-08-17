@@ -61,48 +61,8 @@ services:
       - no-new-privileges:true
     ports:
       - '127.0.0.1:5000:5000'
-
-  celery:
-    container_name: celery
-    image: celery
-    build:
-      context: .
-      dockerfile: ./flask/Dockerfile
-      args:
-        - ROLE=celery
-        - ENV_FILE=${ENV_FILE:-.env}
-    volumes_from:
-      - bayanat
-    read_only: true
-    tmpfs:
-      - /tmp
-    security_opt:
-      - no-new-privileges:true
-    depends_on:
-      postgres:
-        condition: service_healthy
-      redis:
-        condition: service_healthy
-
-  nginx:
-    container_name: nginx
-    restart: always
-    image: 'bitnami/nginx:latest'
-    ports:
-      - '80:80'
-    volumes:
-      - './enferno/static/:/app/static/:ro'
-      - './nginx/nginx.conf:/opt/bitnami/nginx/conf/nginx.conf:ro'
-      - './nginx/bayanat.conf:/opt/bitnami/nginx/conf/server_blocks/bayanat.conf:ro'
-    depends_on:
-      - bayanat
-    read_only: true
-    security_opt:
-      - no-new-privileges:true
-    tmpfs:
-      - /opt/bitnami/nginx/tmp/
     healthcheck:
-      test: [ "CMD", "service", "nginx", "status" ]
+      test: ["CMD-SHELL", "curl --fail http://localhost:5000/ || exit 1"]
       interval: 3s
       retries: 10
 

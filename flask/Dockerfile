@@ -1,8 +1,5 @@
 # ---- use a base image to compile requirements / save image size -----
-FROM ubuntu as base
-ENV DEBIAN_FRONTEND=noninteractive
-RUN apt update -y && \
-    apt install -yq python3-dev python3.10-venv libjpeg8-dev libzip-dev libxml2-dev libssl-dev libffi-dev libxslt1-dev libmysqlclient-dev libncurses5-dev python-setuptools python3-pip libpq-dev libimage-exiftool-perl
+FROM python:3.10-slim as base
 
 WORKDIR /app
 
@@ -12,31 +9,27 @@ ENV LANG=C.UTF-8
 ENV PYTHONDONTWRITEBYTECODE=1
 # Seems to speed things up
 ENV PYTHONUNBUFFERED=1
-# The `--copies` option tells `venv` to copy libs and binaries
-RUN python3 -m venv /opt/venv
-ENV PATH="/opt/venv/bin:$PATH"
 
 COPY ./requirements.txt  /app/requirements.txt
 
-RUN . /opt/venv/bin/activate
+RUN python3 -m venv /opt/venv
+ENV PATH="/opt/venv/bin:$PATH"
 
-
-RUN pip install --no-cache-dir -Ur requirements.txt
-RUN ls -la /opt/venv/bin/
-
+RUN . /opt/venv/bin/activate && \
+    pip install --no-cache-dir -Ur requirements.txt
 
 # ----------------- main container -------------------------
 
-FROM ubuntu
+FROM python:3.10-slim
 
 ENV DEBIAN_FRONTEND=noninteractive
 ARG ROLE
 ENV ROLE=${ROLE}
 RUN echo "Building ${ROLE} container."
 RUN if [ "$ROLE" = "flask" ]; then \
-    apt update -y && apt install -yq python3-dev python3.10-venv postgis; \
+    apt update -y && apt install -yq postgis; \
     elif [ "$ROLE" = "celery" ]; then \
-    apt update -y && apt install -yq python3-dev python3.10-venv postgis libimage-exiftool-perl ffmpeg; \
+    apt update -y && apt install -yq postgis libimage-exiftool-perl ffmpeg; \
     fi
 RUN apt clean
 RUN apt autoremove
